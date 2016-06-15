@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D1107260486CEB800E47090"
                BuildableName = "VertexColor.app"
-               BlueprintName = "VertexColor"
-               ReferencedContainer = "container:VertexColor.xcodeproj">
+               BlueprintName = "Ssao"
+               ReferencedContainer = "container:Ssao.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,8 +34,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
             BuildableName = "VertexColor.app"
-            BlueprintName = "VertexColor"
-            ReferencedContainer = "container:VertexColor.xcodeproj">
+            BlueprintName = "Ssao"
+            ReferencedContainer = "container:Ssao.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -57,8 +57,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
             BuildableName = "VertexColor.app"
-            BlueprintName = "VertexColor"
-            ReferencedContainer = "container:VertexColor.xcodeproj">
+            BlueprintName = "Ssao"
+            ReferencedContainer = "container:Ssao.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -76,8 +76,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
             BuildableName = "VertexColor.app"
-            BlueprintName = "VertexColor"
-            ReferencedContainer = "container:VertexColor.xcodeproj">
+            BlueprintName = "Ssao"
+            ReferencedContainer = "container:Ssao.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

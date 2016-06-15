@@ -15,15 +15,15 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00692BCE14FF149000D0A05E"
-               BuildableName = "VertexColor.app"
-               BlueprintName = "VertexColor"
-               ReferencedContainer = "container:VertexColor.xcodeproj">
+               BuildableName = "Ssao.app"
+               BlueprintName = "Ssao"
+               ReferencedContainer = "container:Ssao.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
@@ -33,16 +33,16 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "00692BCE14FF149000D0A05E"
-            BuildableName = "VertexColor.app"
-            BlueprintName = "VertexColor"
-            ReferencedContainer = "container:VertexColor.xcodeproj">
+            BuildableName = "Ssao.app"
+            BlueprintName = "Ssao"
+            ReferencedContainer = "container:Ssao.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -56,9 +56,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "00692BCE14FF149000D0A05E"
-            BuildableName = "VertexColor.app"
-            BlueprintName = "VertexColor"
-            ReferencedContainer = "container:VertexColor.xcodeproj">
+            BuildableName = "Ssao.app"
+            BlueprintName = "Ssao"
+            ReferencedContainer = "container:Ssao.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -75,14 +75,14 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "00692BCE14FF149000D0A05E"
-            BuildableName = "VertexColor.app"
-            BlueprintName = "VertexColor"
-            ReferencedContainer = "container:VertexColor.xcodeproj">
+            BuildableName = "Ssao.app"
+            BlueprintName = "Ssao"
+            ReferencedContainer = "container:Ssao.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
-      buildConfiguration = "Debug">
+      buildConfiguration = "Release">
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release"
