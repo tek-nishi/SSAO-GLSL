@@ -11,8 +11,8 @@ in vec4  Color;
 in vec4  Specular;
 in vec2  TexCoord0;
 
-out vec4 oColor;
+layout (location = 0) out vec4 oFragColor0;
 		
 void main(void) {
-  oColor = texture(uTex0, TexCoord0) * Color + Specular;
+  oFragColor0 = texture(uTex0, TexCoord0) * Color + Specular;
 }

@@ -20,7 +20,7 @@
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		6C687CBB7C3E46FCB3FEBD89 /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 75C333174B704418A68FE84E /* CinderApp.icns */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		908E04787F45426AAD024BA2 /* VertexColorApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB451FF10C5B4319842463BE /* VertexColorApp.cpp */; };
+		908E04787F45426AAD024BA2 /* SsaoApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB451FF10C5B4319842463BE /* SsaoApp.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,7 +43,7 @@
 		8D1107320486CEB800E47090 /* Ssao.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ssao.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B94C1DDCC24D4C08AB9F12E5 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../include/Resources.h; sourceTree = "<group>"; };
 		D717EA199F4E475AAECE3CD0 /* Ssao_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Ssao_Prefix.pch; sourceTree = "<group>"; };
-		DB451FF10C5B4319842463BE /* VertexColorApp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = VertexColorApp.cpp; path = ../src/VertexColorApp.cpp; sourceTree = "<group>"; };
+		DB451FF10C5B4319842463BE /* SsaoApp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SsaoApp.cpp; path = ../src/SsaoApp.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,7 +78,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				DB451FF10C5B4319842463BE /* VertexColorApp.cpp */,
+				DB451FF10C5B4319842463BE /* SsaoApp.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -223,7 +223,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				908E04787F45426AAD024BA2 /* VertexColorApp.cpp in Sources */,
+				908E04787F45426AAD024BA2 /* SsaoApp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

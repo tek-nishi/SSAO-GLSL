@@ -395,8 +395,7 @@ void drawModel(const Model& model,
       }
       shader->bind();
 
-      // ci::gl::draw(mesh.vbo_mesh);
-      ci::gl::draw(mesh.body);
+      ci::gl::draw(mesh.vbo_mesh);
 
       if (material.has_texture) {
         model.textures.at(material.texture_name)->unbind();

@@ -13,7 +13,6 @@
 #include "common.hpp"
 #include "misc.hpp"
 #include "triMesh.hpp"
-#include "vertexShadow.hpp"
 
 
 struct Weight {
@@ -176,10 +175,7 @@ Mesh createMesh(const aiMesh* const m) {
     mesh.body.appendBoneWeights(bone_weights);
   }
 
-  // 頂点カラーによる陰影生成
-  makeVertexShadow(mesh.body);
-  mesh.has_vertex_color = true;
-  // mesh.vbo_mesh = ci::gl::VboMesh::create(mesh.body);
+  mesh.vbo_mesh = ci::gl::VboMesh::create(mesh.body);
 
   mesh.material_index = m->mMaterialIndex;
 

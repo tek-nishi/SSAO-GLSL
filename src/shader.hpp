@@ -31,7 +31,7 @@ std::string replaceText(std::string text) {
     { std::regex("\\$version\\$"), "#version 300 es" },
     { std::regex("\\$precision\\$"), "precision mediump float;" },
 #else
-    { std::regex("\\$version\\$"), "#version 150" },
+    { std::regex("\\$version\\$"), "#version 330" },
     { std::regex("\\$precision\\$"), "" },
 #endif
   };

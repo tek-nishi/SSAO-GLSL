@@ -1,5 +1,6 @@
 ﻿//
-// 頂点カラーで陰影をつける
+// SSAO
+//   マルチレンダーターゲットを使った実装
 //
 
 #include <cinder/app/App.h>
@@ -18,7 +19,14 @@ using namespace ci;
 using namespace ci::app;
 
 
-class VertexColorApp : public App {
+class SsaoApp : public App {
+  enum {
+    FBO_WIDTH  = 512,
+    FBO_HEIGHT = 512,
+  };
+  
+	gl::FboRef fbo;
+  
   CameraPersp camera_persp;
   CameraOrtho camera_ui;
 
@@ -104,7 +112,7 @@ public:
 
 // 垂直方向の視野角を計算する
 //   縦長画面の場合は画面の縦横比から求める
-float VertexColorApp::getVerticalFov() {
+float SsaoApp::getVerticalFov() {
   float aspect = ci::app::getWindowAspectRatio();
   camera_persp.setAspectRatio(aspect);
 
@@ -128,7 +136,7 @@ float VertexColorApp::getVerticalFov() {
 
 
 // 読み込んだモデルの大きさに応じてカメラを設定する
-void VertexColorApp::setupCamera() {
+void SsaoApp::setupCamera() {
   // 初期位置はモデルのAABBの中心位置とする
   offset = -model.aabb.getCenter();
 
@@ -154,7 +162,7 @@ void VertexColorApp::setupCamera() {
 }
 
 // グリッド描画
-void VertexColorApp::drawGrid() {
+void SsaoApp::drawGrid() {
   gl::ScopedGlslProg shader(gl::getStockShader(gl::ShaderDef().color()));
 
   gl::lineWidth(1.0f);
@@ -180,14 +188,14 @@ void VertexColorApp::drawGrid() {
 #if defined (CINDER_COCOA_TOUCH)
 
 // iOS版はダイアログ関連の実装が無い
-void VertexColorApp::makeSettinsText() {}
-void VertexColorApp::createDialog() {}
-void VertexColorApp::drawDialog() {}
+void SsaoApp::makeSettinsText() {}
+void SsaoApp::createDialog() {}
+void SsaoApp::drawDialog() {}
 
 #else
 
 // 現在の設定をテキスト化
-void VertexColorApp::makeSettinsText() {
+void SsaoApp::makeSettinsText() {
   std::ostringstream str;
 
   str << (two_sided    ? "D" : " ") << " "
@@ -201,7 +209,7 @@ void VertexColorApp::makeSettinsText() {
 }
 
 // ダイアログ作成
-void VertexColorApp::createDialog() {
+void SsaoApp::createDialog() {
 	// 各種パラメーター設定
 	params = params::InterfaceGl::create("Preview params", toPixels(ivec2(200, 400)));
 
@@ -228,20 +236,28 @@ void VertexColorApp::createDialog() {
 }
 
 // ダイアログ表示
-void VertexColorApp::drawDialog() {
+void SsaoApp::drawDialog() {
 	params->draw();
 }
 
 #endif
 
 
-void VertexColorApp::setup() {
+void SsaoApp::setup() {
 #if defined (CINDER_COCOA_TOUCH)
   // 縦横画面両対応
   getSignalSupportedOrientations().connect([]() { return ci::app::InterfaceOrientation::All; });
 #endif
 
   gl::enableVerticalSync(true);
+
+  // FBO生成
+	auto format = gl::Fbo::Format()
+//			.samples( 4 ) // uncomment this to enable 4x antialiasing
+    .attachment(GL_COLOR_ATTACHMENT0, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
+    .attachment(GL_COLOR_ATTACHMENT1, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT));
+	fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
+
   
   touch_num = 0;
   // アクティブになった時にタッチ情報を初期化
@@ -265,7 +281,7 @@ void VertexColorApp::setup() {
   fov = 35.0f;
   setupCamera();
 
-  camera_persp = CameraPersp(getWindowWidth(), getWindowHeight(),
+  camera_persp = CameraPersp(FBO_WIDTH, FBO_HEIGHT,
                              fov,
                              near_z, far_z);
 
@@ -309,13 +325,13 @@ void VertexColorApp::setup() {
 }
 
 
-void VertexColorApp::resize() {
+void SsaoApp::resize() {
   camera_persp.setFov(getVerticalFov());
   touch_num = 0;
 }
 
 
-void VertexColorApp::fileDrop(FileDropEvent event) {
+void SsaoApp::fileDrop(FileDropEvent event) {
   const auto& path = event.getFiles();
   console() << "Load: " << path[0] << std::endl;
 
@@ -337,7 +353,7 @@ void VertexColorApp::fileDrop(FileDropEvent event) {
 }
 
 
-void VertexColorApp::mouseDown(MouseEvent event) {
+void SsaoApp::mouseDown(MouseEvent event) {
   if (touch_num > 1) return;
 
   if (event.isLeft()) {
@@ -347,7 +363,7 @@ void VertexColorApp::mouseDown(MouseEvent event) {
   }
 }
 
-void VertexColorApp::mouseDrag(MouseEvent event) {
+void SsaoApp::mouseDrag(MouseEvent event) {
   if (touch_num > 1) return;
 
   if (!event.isLeftDown()) return;
@@ -382,7 +398,7 @@ void VertexColorApp::mouseDrag(MouseEvent event) {
 }
 
 
-void VertexColorApp::mouseWheel(MouseEvent event) {
+void SsaoApp::mouseWheel(MouseEvent event) {
   // OSX:マルチタッチ操作の時に呼ばれる
   if (touch_num > 1) return;
 
@@ -392,7 +408,7 @@ void VertexColorApp::mouseWheel(MouseEvent event) {
 }
 
 
-void VertexColorApp::keyDown(KeyEvent event) {
+void SsaoApp::keyDown(KeyEvent event) {
   int key_code = event.getCode();
   switch (key_code) {
   case KeyEvent::KEY_r:
@@ -469,13 +485,13 @@ void VertexColorApp::keyDown(KeyEvent event) {
 }
 
 
-void VertexColorApp::touchesBegan(TouchEvent event) {
+void SsaoApp::touchesBegan(TouchEvent event) {
   const auto& touches = event.getTouches();
 
   touch_num += touches.size();
 }
 
-void VertexColorApp::touchesMoved(TouchEvent event) {
+void SsaoApp::touchesMoved(TouchEvent event) {
 //  if (touch_num < 2) return;
 
   const auto& touches = event.getTouches();
@@ -518,7 +534,7 @@ void VertexColorApp::touchesMoved(TouchEvent event) {
   }
 }
 
-void VertexColorApp::touchesEnded(TouchEvent event) {
+void SsaoApp::touchesEnded(TouchEvent event) {
   const auto& touches = event.getTouches();
 
   // 最悪マイナス値にならないよう
@@ -526,7 +542,7 @@ void VertexColorApp::touchesEnded(TouchEvent event) {
 }
 
 
-void VertexColorApp::update() {
+void SsaoApp::update() {
   double elapsed_time = getElapsedSeconds();
   double delta_time   = elapsed_time - prev_elapsed_time;
 
@@ -538,41 +554,52 @@ void VertexColorApp::update() {
   prev_elapsed_time = elapsed_time;
 }
 
-void VertexColorApp::draw() {
-  gl::clear(Color(0.0f, 0.0f, 0.0f));
+void SsaoApp::draw() {
+  {
+    gl::ScopedViewport viewportScope(ivec2( 0 ), fbo->getSize());
+    gl::ScopedFramebuffer fboScope(fbo);
+    
+    gl::clear(Color(0.0f, 0.0f, 0.0f));
+    
+    // モデル描画
+    gl::setMatrices(camera_persp);
 
-  // 背景描画
-  gl::setMatrices(camera_ui);
+    gl::enableDepthRead();
+    gl::enableDepthWrite();
 
-  gl::disableDepthRead();
-  gl::disableDepthWrite();
-  gl::color(bg_color);
-  gl::translate(0.0f, 0.0f, -2.0f);
-  gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+    gl::translate(vec3(0, 0.0, -z_distance));
+    gl::translate(translate);
+    gl::rotate(rotate);
 
-  // モデル描画
-  gl::setMatrices(camera_persp);
+    gl::translate(offset);
 
-  gl::enableDepthRead();
-  gl::enableDepthWrite();
-
-  gl::translate(vec3(0, 0.0, -z_distance));
-  gl::translate(translate);
-  gl::rotate(rotate);
-
-  gl::translate(offset);
-
-  ubo_light->copyData(sizeof (Light), &light);
+    ubo_light->copyData(sizeof (Light), &light);
   
-  drawModel(model, shader_holder);
+    drawModel(model, shader_holder);
 
 #if !defined (CINDER_COCOA_TOUCH)
-  // FIXME:iOSだと劇重
-  if (do_disp_grid) drawGrid();
+    // FIXME:iOSだと劇重
+    if (do_disp_grid) drawGrid();
 #endif
+  }
+
+  {
+    // 背景描画
+    gl::setMatrices(camera_ui);
+
+    gl::disableDepthRead();
+    gl::disableDepthWrite();
+    gl::color(bg_color);
+    gl::translate(0.0f, 0.0f, -2.0f);
+    gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+    
+    gl::color(ColorA(1.0f, 1.0f, 1.0f, 1.0f));
+    auto tex0 = fbo->getTexture2d(GL_COLOR_ATTACHMENT0);
+    gl::draw(tex0, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+  }
 
   // ダイアログ表示
-  drawDialog();
+   drawDialog();
 }
 
 
@@ -589,7 +616,7 @@ enum {
 };
 
 // アプリのラウンチコード
-CINDER_APP(VertexColorApp,
+CINDER_APP(SsaoApp,
            RendererGl(RendererGl::Options().msaa(MSAA_VALUE)),
            [](App::Settings* settings) {
              // 画面サイズを変更する
