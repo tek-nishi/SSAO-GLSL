@@ -253,9 +253,10 @@ void SsaoApp::setup() {
 
   // FBO生成
 	auto format = gl::Fbo::Format()
-//			.samples( 4 ) // uncomment this to enable 4x antialiasing
+    .depthBuffer()
+    .depthTexture()
     .attachment(GL_COLOR_ATTACHMENT0, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
-    .attachment(GL_COLOR_ATTACHMENT1, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT));
+    ;
 	fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
 
   
@@ -559,7 +560,8 @@ void SsaoApp::draw() {
     gl::ScopedViewport viewportScope(ivec2( 0 ), fbo->getSize());
     gl::ScopedFramebuffer fboScope(fbo);
     
-    gl::clear(Color(0.0f, 0.0f, 0.0f));
+    gl::clear(ColorA(0.0f, 0.0f, 0.0f, 0.0f));
+    gl::enableAlphaBlending();
     
     // モデル描画
     gl::setMatrices(camera_persp);
@@ -592,10 +594,11 @@ void SsaoApp::draw() {
     gl::color(bg_color);
     gl::translate(0.0f, 0.0f, -2.0f);
     gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
-    
+
     gl::color(ColorA(1.0f, 1.0f, 1.0f, 1.0f));
-    auto tex0 = fbo->getTexture2d(GL_COLOR_ATTACHMENT0);
-    gl::draw(tex0, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+    auto texture = fbo->getTexture2d(GL_COLOR_ATTACHMENT0);
+    // auto texture = fbo->getDepthTexture();
+    gl::draw(texture, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
   }
 
   // ダイアログ表示
