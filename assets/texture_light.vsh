@@ -29,7 +29,7 @@ in vec2 ciTexCoord0;
 out vec2 TexCoord0;
 out vec4 Color;
 out vec4 Specular;
-out vec4 normal_depth;
+out vec3 Normal;
 
 
 void main(void) {
@@ -54,5 +54,5 @@ void main(void) {
   TexCoord0 = ciTexCoord0;
 
   // 法線 + Z
-  normal_depth = vec4(normal, position.z / position.w);
+  Normal = normal;
 }

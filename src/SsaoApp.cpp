@@ -8,6 +8,7 @@
 #include <cinder/gl/gl.h>
 #include <cinder/Camera.h>
 #include <cinder/params/Params.h>
+#include <cinder/Rand.h>
 #include <functional>
 #include <sstream>
 
@@ -71,6 +72,8 @@ class SsaoApp : public App {
   gl::Texture2dRef bg_image;
 
   gl::GlslProgRef ao;
+  vec2 sampOffset[6];
+
   
   std::string settings;
 
@@ -327,6 +330,13 @@ void SsaoApp::setup() {
     ao = ci::gl::GlslProg::create(shader.first, shader.second);
     ao->uniform("uTex0", 0);
     ao->uniform("uTex1", 1);
+    ao->uniform("uTex2", 2);
+
+    for (u_int i = 0; i < 6; ++i) {
+      sampOffset[i] = vec2(Rand::randFloat(0.01f, 0.02f),
+                           Rand::randFloat(0.01f, 0.02f));
+    }
+    ao->uniform("sampOffset", sampOffset, 6);
   }
   
   // ダイアログ作成
@@ -612,6 +622,7 @@ void SsaoApp::draw() {
 
     fbo->getTexture2d(GL_COLOR_ATTACHMENT0)->bind(0);
     fbo->getTexture2d(GL_COLOR_ATTACHMENT1)->bind(1);
+    fbo->getDepthTexture()->bind(2);
     gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
   }
 
