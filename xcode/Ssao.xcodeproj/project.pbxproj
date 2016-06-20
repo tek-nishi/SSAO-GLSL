@@ -256,7 +256,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Ssao;
-				SYMROOT = ./build;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -287,7 +286,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Ssao;
 				STRIP_INSTALLED_PRODUCT = YES;
-				SYMROOT = ./build;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
