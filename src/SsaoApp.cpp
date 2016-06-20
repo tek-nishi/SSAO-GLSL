@@ -70,8 +70,11 @@ class SsaoApp : public App {
   Color bg_color;
   gl::Texture2dRef bg_image;
 
+  gl::GlslProgRef ao;
+  
   std::string settings;
 
+  
 #if !defined (CINDER_COCOA_TOUCH)
   // iOS版はダイアログの実装が無い
 	params::InterfaceGlRef params;
@@ -146,12 +149,12 @@ void SsaoApp::setupCamera() {
 
   z_distance = distance;
 
-  rotate     = glm::angleAxis(0.0f, vec3(0.0f, 1.0f, 0.0f));
-  translate  = vec3();
+  rotate    = glm::angleAxis(0.0f, vec3(0.0f, 1.0f, 0.0f));
+  translate = vec3();
 
   // NearクリップとFarクリップを決める
   float size = length(model.aabb.getSize());
-  near_z = size * 0.01f;
+  near_z = size * 0.1f;
   far_z  = size * 100.0f;
 
   // グリッドのスケールも決める
@@ -256,6 +259,7 @@ void SsaoApp::setup() {
     .depthBuffer()
     .depthTexture()
     .attachment(GL_COLOR_ATTACHMENT0, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
+    .attachment(GL_COLOR_ATTACHMENT1, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
     ;
 	fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
 
@@ -317,6 +321,13 @@ void SsaoApp::setup() {
 
   two_sided    = false;
   disp_reverse = false;
+
+  {
+    auto shader = readShader("ao", "ao");
+    ao = ci::gl::GlslProg::create(shader.first, shader.second);
+    ao->uniform("uTex0", 0);
+    ao->uniform("uTex1", 1);
+  }
   
   // ダイアログ作成
   createDialog();
@@ -557,7 +568,7 @@ void SsaoApp::update() {
 
 void SsaoApp::draw() {
   {
-    gl::ScopedViewport viewportScope(ivec2( 0 ), fbo->getSize());
+    gl::ScopedViewport viewportScope(ivec2(0), fbo->getSize());
     gl::ScopedFramebuffer fboScope(fbo);
     
     gl::clear(ColorA(0.0f, 0.0f, 0.0f, 0.0f));
@@ -594,11 +605,14 @@ void SsaoApp::draw() {
     gl::color(bg_color);
     gl::translate(0.0f, 0.0f, -2.0f);
     gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+  }
 
-    gl::color(ColorA(1.0f, 1.0f, 1.0f, 1.0f));
-    auto texture = fbo->getTexture2d(GL_COLOR_ATTACHMENT0);
-    // auto texture = fbo->getDepthTexture();
-    gl::draw(texture, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+  {
+    gl::ScopedGlslProg shader(ao);
+
+    fbo->getTexture2d(GL_COLOR_ATTACHMENT0)->bind(0);
+    fbo->getTexture2d(GL_COLOR_ATTACHMENT1)->bind(1);
+    gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
   }
 
   // ダイアログ表示
