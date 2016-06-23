@@ -18,5 +18,5 @@ layout (location = 1) out vec4 oFragColor1;
 
 void main(void) {
   oFragColor0 = texture(uTex0, TexCoord0) * Color + Specular;
-  oFragColor1 = vec4(Normal, 1.0);
+  // oFragColor1 = vec4(Normal, 1.0);
 }

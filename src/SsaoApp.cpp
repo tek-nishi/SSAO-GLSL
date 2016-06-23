@@ -72,7 +72,9 @@ class SsaoApp : public App {
   gl::Texture2dRef bg_image;
 
   gl::GlslProgRef ao;
+  
   vec2 sampOffset[6];
+  gl::Texture2dRef matrix_texture;
 
   
   std::string settings;
@@ -331,12 +333,29 @@ void SsaoApp::setup() {
     ao->uniform("uTex0", 0);
     ao->uniform("uTex1", 1);
     ao->uniform("uTex2", 2);
+    ao->uniform("matrix_texture", 3);
 
     for (u_int i = 0; i < 6; ++i) {
-      sampOffset[i] = vec2(Rand::randFloat(0.01f, 0.02f),
-                           Rand::randFloat(0.01f, 0.02f));
+      sampOffset[i] = vec2(Rand::randFloat(0.001f, 0.02f),
+                           Rand::randFloat(0.001f, 0.02f));
     }
     ao->uniform("sampOffset", sampOffset, 6);
+
+    std::vector<mat2> rotations;
+    for (size_t i = 0; i < 16; ++i) {
+      float r = Rand::randFloat(-M_PI, M_PI);
+      rotations.push_back(mat2(std::cos(r), -std::sin(r), std::sin(r), std::cos(r)));
+    }
+    
+    matrix_texture = gl::Texture2d::create((void*)&rotations[0],
+                                           GL_RGBA,
+                                           4, 4,
+                                           gl::Texture2d::Format()
+                                           .internalFormat(GL_RGBA16F)
+                                           .dataType(GL_FLOAT)
+                                           .wrap(GL_REPEAT)
+                                           .minFilter(GL_NEAREST)
+                                           .magFilter(GL_NEAREST));
   }
   
   // ダイアログ作成
@@ -623,6 +642,7 @@ void SsaoApp::draw() {
     fbo->getTexture2d(GL_COLOR_ATTACHMENT0)->bind(0);
     fbo->getTexture2d(GL_COLOR_ATTACHMENT1)->bind(1);
     fbo->getDepthTexture()->bind(2);
+    matrix_texture->bind(3);
     gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
   }
 
