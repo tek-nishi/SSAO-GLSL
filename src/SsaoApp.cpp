@@ -76,6 +76,8 @@ class SsaoApp : public App {
   gl::GlslProgRef df;
   float blurAmnt;
   float focusZ;
+
+	gl::FboRef df_fbo;
   
   vec2 sampOffset[6];
   gl::Texture2dRef matrix_texture;
@@ -270,22 +272,37 @@ void SsaoApp::setup() {
   gl::enableVerticalSync(true);
 
   // FBO生成
-	auto format = gl::Fbo::Format()
-    .depthBuffer()
-    .depthTexture()
-    .attachment(GL_COLOR_ATTACHMENT0, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
-    .attachment(GL_COLOR_ATTACHMENT1, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
-    .attachment(GL_COLOR_ATTACHMENT2,
-                gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT,
-                                      gl::Texture2d::Format()
-                                      .internalFormat(GL_RGB16F)
-                                      .dataType(GL_FLOAT)
-                                      .wrap(GL_REPEAT)
-                                      .minFilter(GL_NEAREST)
-                                      .magFilter(GL_NEAREST)));
-    ;
-	fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
+  {
+    auto format = gl::Fbo::Format()
+      // depth
+      .depthBuffer()
+      .depthTexture()
+      // albedo
+      .attachment(GL_COLOR_ATTACHMENT0, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
+      // normal
+      .attachment(GL_COLOR_ATTACHMENT1, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
+      // AO
+      .attachment(GL_COLOR_ATTACHMENT2,
+                  gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT,
+                                        gl::Texture2d::Format()
+                                        .internalFormat(GL_RGB16F)
+                                        .dataType(GL_FLOAT)
+                                        .wrap(GL_REPEAT)
+                                        .minFilter(GL_NEAREST)
+                                        .magFilter(GL_NEAREST)))
+      ;
+    
+    fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
+  }
 
+  {
+    auto format = gl::Fbo::Format()
+      .colorTexture()
+      ;
+
+    df_fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
+  }
+  
   
   touch_num = 0;
   // アクティブになった時にタッチ情報を初期化
@@ -627,12 +644,25 @@ void SsaoApp::draw() {
     gl::ScopedViewport viewportScope(ivec2(0), fbo->getSize());
     gl::ScopedFramebuffer fboScope(fbo);
     
-    gl::clear(ColorA(0.0f, 0.0f, 0.0f, 0.0f));
-    gl::enableAlphaBlending();
+    gl::clear(ColorA(0.0f, 0.0f, 0.0f));
+
+    {
+      // 背景描画
+      gl::setMatrices(camera_ui);
+
+      gl::disableAlphaBlending();
+      gl::disableDepthRead();
+      gl::disableDepthWrite();
+
+      gl::color(bg_color);
+      gl::translate(0.0f, 0.0f, -2.0f);
+      gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
+    }
     
     // モデル描画
     gl::setMatrices(camera_persp);
 
+    gl::enableAlphaBlending();
     gl::enableDepthRead();
     gl::enableDepthWrite();
 
@@ -652,26 +682,33 @@ void SsaoApp::draw() {
 #endif
   }
 
-  {
-    // 背景描画
-    gl::setMatrices(camera_ui);
-
-    gl::disableDepthRead();
-    gl::disableDepthWrite();
-    gl::color(bg_color);
-    gl::translate(0.0f, 0.0f, -2.0f);
-    gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
-  }
 
 #if 1
   {
-    // Depth of Field
+    // Depth of Field(2-pass)
+    gl::ScopedViewport viewportScope(ivec2(0), fbo->getSize());
+    gl::ScopedFramebuffer fboScope(df_fbo);
     gl::ScopedGlslProg shader(df);
+
+    gl::setMatrices(camera_ui);
+
+    gl::disableAlphaBlending();
+    gl::disableDepthRead();
+    gl::disableDepthWrite();
 
     fbo->getTexture2d(GL_COLOR_ATTACHMENT0)->bind(0);
     fbo->getDepthTexture()->bind(1);
-    df->uniform("blurAmnt", blurAmnt);
+    df->uniform("blurAmnt", vec2(blurAmnt, 0.0));
     df->uniform("focusZ",   focusZ);
+
+    gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
+  }
+
+  {
+    gl::ScopedGlslProg shader(df);
+    
+    df_fbo->getColorTexture()->bind(0);
+    df->uniform("blurAmnt", vec2(0.0, blurAmnt));
     
     gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
   }
@@ -708,7 +745,7 @@ enum {
 
 // アプリのラウンチコード
 CINDER_APP(SsaoApp,
-           RendererGl(RendererGl::Options().msaa(MSAA_VALUE)),
+           RendererGl,
            [](App::Settings* settings) {
              // 画面サイズを変更する
              settings->setWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
