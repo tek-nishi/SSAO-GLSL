@@ -72,6 +72,10 @@ class SsaoApp : public App {
   gl::Texture2dRef bg_image;
 
   gl::GlslProgRef ao;
+
+  gl::GlslProgRef df;
+  float blurAmnt;
+  float focusZ;
   
   vec2 sampOffset[6];
   gl::Texture2dRef matrix_texture;
@@ -241,6 +245,12 @@ void SsaoApp::createDialog() {
   params->addParam("Speed", &animation_speed).min(0.1).max(10.0).precision(2).step(0.05);
 
   makeSettinsText();
+
+  params->addSeparator();
+
+  params->addParam("blurAmnt", &blurAmnt).min(0.0).max(1.0).step(0.001);
+  params->addParam("focusZ", &focusZ).min(0.0).max(1.0).step(0.001);
+  
 }
 
 // ダイアログ表示
@@ -265,6 +275,14 @@ void SsaoApp::setup() {
     .depthTexture()
     .attachment(GL_COLOR_ATTACHMENT0, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
     .attachment(GL_COLOR_ATTACHMENT1, gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT))
+    .attachment(GL_COLOR_ATTACHMENT2,
+                gl::Texture2d::create(FBO_WIDTH, FBO_HEIGHT,
+                                      gl::Texture2d::Format()
+                                      .internalFormat(GL_RGB16F)
+                                      .dataType(GL_FLOAT)
+                                      .wrap(GL_REPEAT)
+                                      .minFilter(GL_NEAREST)
+                                      .magFilter(GL_NEAREST)));
     ;
 	fbo = gl::Fbo::create(FBO_WIDTH, FBO_HEIGHT, format);
 
@@ -328,7 +346,7 @@ void SsaoApp::setup() {
   disp_reverse = false;
 
   {
-    auto shader = readShader("ao", "ao");
+    auto shader = readShader("ao", "ao2");
     ao = ci::gl::GlslProg::create(shader.first, shader.second);
     ao->uniform("uTex0", 0);
     ao->uniform("uTex1", 1);
@@ -336,8 +354,8 @@ void SsaoApp::setup() {
     ao->uniform("matrix_texture", 3);
 
     for (u_int i = 0; i < 6; ++i) {
-      sampOffset[i] = vec2(Rand::randFloat(0.001f, 0.02f),
-                           Rand::randFloat(0.001f, 0.02f));
+      sampOffset[i] = vec2(Rand::randFloat(-0.01f, 0.01f),
+                           Rand::randFloat(-0.01f, 0.01f));
     }
     ao->uniform("sampOffset", sampOffset, 6);
 
@@ -356,6 +374,15 @@ void SsaoApp::setup() {
                                            .wrap(GL_REPEAT)
                                            .minFilter(GL_NEAREST)
                                            .magFilter(GL_NEAREST));
+  }
+
+  {
+    auto shader = readShader("ao", "df");
+    df = ci::gl::GlslProg::create(shader.first, shader.second);
+    df->uniform("uTex0", 0);
+    df->uniform("uTex1", 1);
+    blurAmnt = 0.0f;
+    focusZ = 0.5f;
   }
   
   // ダイアログ作成
@@ -636,15 +663,31 @@ void SsaoApp::draw() {
     gl::draw(bg_image, Rectf{ 0.0f, 0.0f, 1.0f, 1.0f });
   }
 
+#if 1
   {
+    // Depth of Field
+    gl::ScopedGlslProg shader(df);
+
+    fbo->getTexture2d(GL_COLOR_ATTACHMENT0)->bind(0);
+    fbo->getDepthTexture()->bind(1);
+    df->uniform("blurAmnt", blurAmnt);
+    df->uniform("focusZ",   focusZ);
+    
+    gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
+  }
+#else
+  {
+    // SSAO
     gl::ScopedGlslProg shader(ao);
 
     fbo->getTexture2d(GL_COLOR_ATTACHMENT0)->bind(0);
     fbo->getTexture2d(GL_COLOR_ATTACHMENT1)->bind(1);
     fbo->getDepthTexture()->bind(2);
     matrix_texture->bind(3);
+    
     gl::drawSolidRect(Rectf{ -1.0f, 1.0f, 1.0f, -1.0f });
   }
+#endif
 
   // ダイアログ表示
    drawDialog();

@@ -29,6 +29,7 @@ in vec2 ciTexCoord0;
 out vec2 TexCoord0;
 out vec4 Color;
 out vec4 Specular;
+// 頂点法線
 out vec3 Normal;
 
 

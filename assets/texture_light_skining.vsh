@@ -35,6 +35,8 @@ in vec4  ciBoneWeight;
 out vec2 TexCoord0;
 out vec4 Color;
 out vec4 Specular;
+// 頂点法線
+out vec3 Normal;
 
 
 void main(void) {
@@ -63,4 +65,7 @@ void main(void) {
                 vec4(1.0f, 1.0f, 1.0f, 1.0f));
   Specular  = mat_specular * light_specular * specular;
   TexCoord0 = ciTexCoord0;
+
+  // 法線 + Z
+  Normal = normal;
 }
