@@ -357,7 +357,7 @@ void SsaoApp::setup() {
 
   
   bg_color = Color(0.7f, 0.7f, 0.7f);
-  bg_image = gl::Texture2d::create(loadImage(loadAsset("bg.png")));
+  bg_image = gl::Texture2d::create(loadImage(loadAsset("bg2.png")));
 
   two_sided    = false;
   disp_reverse = false;

@@ -17,30 +17,54 @@ in vec2 TexCoord;
 out vec4 oColor;
 
 
-// SOURCE:https://github.com/Jam3/glsl-fast-gaussian-blur
-vec4 blur9(sampler2D image, vec2 uv, vec2 direction) {
-  vec4 color = vec4(0.0);
+// vec4 GaussianBlur(sampler2D tex0, vec2 centreUV, vec2 pixelOffset) {
+//   vec4 colOut = vec4(0);
 
-  vec2 off1 = vec2(1.3846153846) * direction;
-  vec2 off2 = vec2(3.2307692308) * direction;
+//   // Kernel width 35 x 35
+//   const int stepCount = 9;
+//   const float gWeights[stepCount] = float[](
+//     0.10855,
+//     0.13135,
+//     0.10406,
+//     0.07216,
+//     0.04380,
+//     0.02328,
+//     0.01083,
+//     0.00441,
+//     0.00157
+//   );
   
-  color += texture(image, uv) * 0.2270270270;
-  color += texture(image, uv + off1) * 0.3162162162;
-  color += texture(image, uv - off1) * 0.3162162162;
-  color += texture(image, uv + off2) * 0.0702702703;
-  color += texture(image, uv - off2) * 0.0702702703;
+//   const float gOffsets[stepCount] = float[](
+//     0.66293,
+//     2.47904,
+//     4.46232,
+//     6.44568,
+//     8.42917,
+//     10.41281,
+//     12.39664,
+//     14.38070,
+//     16.36501
+//   );
 
-  return color;
-}
+//   for (int i = 0; i < stepCount; i++) {
+//     vec2 texCoordOffset = gOffsets[i] * pixelOffset;
+//     vec4 col = texture(tex0, centreUV + texCoordOffset) + texture(tex0, centreUV - texCoordOffset);
+//     colOut += gWeights[i] * col;
+//   }
+    
+//   return colOut;
+// }
 
-void main()
-{
-  // SOURCE:https://github.com/emahub/gaussianBlurFilter
-  vec4 color = vec4(0);
 
+void main() {
   float depth = texture(uTex1, TexCoord).x;
-  vec2 blur = blurAmnt * abs(depth - focusZ);
-  // oColor = blur9(uTex0, TexCoord, blur);
+  vec2  blur  = blurAmnt * (depth - focusZ);
+
+  // SOURCE:https://software.intel.com/en-us/blogs/2014/07/15/an-investigation-of-fast-real-time-gpu-based-image-blur-algorithms
+  // oColor = GaussianBlur(uTex0, TexCoord, blur);
+  
+  // SOURCE:https://github.com/mattdesl/lwjgl-basics/wiki/ShaderLesson5
+  vec4  color = vec4(0);
 
   color += texture(uTex0, TexCoord - 4.0 * blur) * 0.0162162162;
   color += texture(uTex0, TexCoord - 3.0 * blur) * 0.0540540541;

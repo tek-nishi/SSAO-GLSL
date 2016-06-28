@@ -9,6 +9,7 @@ SSAOをOpenGLのGLSLで実装してみたテスト
 
 + Assimpでモデルデータを読み込む
 + GLSLによるSSAOの実装
++ GLSLによる簡易被写界深度の実装
 + ダイアログによる簡易プレビューワ設定変更
 + iOS対応(OpenGL ES 3.0)
 
